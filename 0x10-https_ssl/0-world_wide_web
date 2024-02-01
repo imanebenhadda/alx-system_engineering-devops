@@ -1,27 +1,12 @@
 #!/usr/bin/env bash
-# Retrieve information for a specified domain name and its subdomains
-awk_function(){
-    local domainName="$1"
-    local subdom="$2"
-    res=$(dig "$subdom"."$domainName" | grep ^"$subdom"."$domainName")
-    record_type=$(echo "$res" | awk '{print $4}')
-    ip_address=$(echo "$res" | awk '{print $5}')
-    echo "The subdomain $subdom is a $record_type record and points to $ip_address"
-}
+#Double the number of webservers
 
-if [ $# -lt 1 ]; then
-    echo "USAGE : ./0-world_wide_web domain [subdomain]"
-fi
-if [ $# -eq 1 ]; then
-    domainName="$1"
-    subdomains=("www" "lb-01" "web-01" "web-02")
-    for subdom in "${subdomains[@]}"; do
-    	awk_function "$domainName" "$subdom" 
-	done
-fi
-
-if [ $# -ge 2 ]; then
-        domainName="$1"
-        subdom="$2"
-        awk_function "$domainName" "$subdom" 
+if [ "$#" -eq 1 ]; then
+    echo "$(dig www.$1 | awk '/ANSWER SECTION:/ {getline; print "The subdomain www is a "$4" record and points to "$5}')"
+    echo "$(dig lb-01.$1 | awk '/ANSWER SECTION:/ {getline; print "The subdomain lb-01 is a "$4" record and points to "$5}')"
+    echo "$(dig web-01.$1 | awk '/ANSWER SECTION:/ {getline; print "The subdomain web-01 is a "$4" record and points to "$5}')"
+    echo "$(dig web-02.$1 | awk '/ANSWER SECTION:/ {getline; print "The subdomain web-02 is a "$4" record and points to "$5}')"
+elif [ "$#" -eq 2 ]; then
+    subdomain=$2
+    echo "$(dig $subdomain.$1 | awk '/ANSWER SECTION:/ {getline; print "The subdomain '"$subdomain"' is a "$4" record and points to "$5}')"
 fi
