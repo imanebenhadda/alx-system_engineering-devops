@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Retrieve information for a specified domain name and its subdomains
+awk_function(){
+    local domainName="$1"
+    local subdom="$2"
+    res=$(dig "$subdom"."$domainName" | grep ^"$subdom"."$domainName")
+    record_type=$(echo "$res" | awk '{print $4}')
+    ip_address=$(echo "$res" | awk '{print $5}')
+    echo "The subdomain $subdom is a $record_type record and points to $ip_address"
+}
+
+if [ $# -lt 1 ]; then
+    echo "USAGE : ./0-world_wide_web domain [subdomain]"
+fi
+if [ $# -eq 1 ]; then
+    domainName="$1"
+    subdomains=("www" "lb-01" "web-01" "web-02")
+    for subdom in "${subdomains[@]}"; do
+    	awk_function "$domainName" "$subdom" 
+	done
+fi
+
+if [ $# -ge 2 ]; then
+        domainName="$1"
+        subdom="$2"
+        awk_function "$domainName" "$subdom" 
+fi
