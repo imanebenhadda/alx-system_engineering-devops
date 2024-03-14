@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# renewed all the workers of Gunicorn 
+kill -HUP "$(pgrep gunicorn | awk '{print $1}')"
